@@ -1,0 +1,5 @@
+{
+  "encode_to_decode_ratio": 4.0,
+  "use_exogenous": true,
+  "activation": "relu"
+}
