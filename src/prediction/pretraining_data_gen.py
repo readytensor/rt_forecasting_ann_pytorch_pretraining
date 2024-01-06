@@ -4,7 +4,7 @@ from preprocessing.custom_transformers import TimeSeriesMinMaxScaler
 
 np.random.seed(1)
 
-MAX_NUM_PRETRAINING_SERIES = 75_000
+MAX_NUM_PRETRAINING_SERIES = 100_000
 
 def calculate_max_N(T: int, D: int, target_ram_gb: float) -> int:
     """
