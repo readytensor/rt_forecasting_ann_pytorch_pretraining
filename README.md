@@ -1,4 +1,4 @@
-# ANN Forecasting Model in PyTorch
+# ANN Forecasting Model with PreTraining in PyTorch
 
 Artificial Neural Network (ANN) Forecasting Model in PyTorch as per Ready Tensor specifications. This is a simple MLP model. Model is pretrained using synthetically generated data and then fine-tuned on the actual data. Synthetic data is generated to represent the most dominant expected patterns in the data given it's frequency and seasonality. For example for daily level data, day of the week and week of the year seasonalities are injected along with trend, random walk, and noise.
 
