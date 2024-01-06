@@ -102,7 +102,7 @@ class ForecastingSchema:
         Returns:
             str: The frequency of the day.
         """
-        return str(self.schema["frequency"])
+        return self.schema["frequency"]
 
     @property
     def forecast_length(self) -> int:

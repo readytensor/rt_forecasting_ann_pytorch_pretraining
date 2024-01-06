@@ -10,13 +10,14 @@ from prediction.predictor_model import (
 from preprocessing.preprocess import (
     get_preprocessing_pipelines,
     fit_transform_with_pipeline,
-    save_pipelines
+    save_pipelines,
 )
 from schema.data_schema import load_json_data_schema, save_schema
 from utils import (
     read_csv_in_directory,
     read_json_as_dict,
     set_seeds,
+    train_test_split
 )
 
 logger = get_logger(task_name="train")
@@ -94,15 +95,24 @@ def run_training(
         trained_pipeline, transformed_data = fit_transform_with_pipeline(
             training_pipeline, validated_data
         )
+        logger.info(f"Transformed training data shape: {transformed_data.shape}")
 
         # Save pipelines
         logger.info("Saving pipelines...")
         save_pipelines(trained_pipeline, inference_pipeline, preprocessing_dir_path)
 
+        # perform train/valid split
+        logger.info("Splitting train and validation data...")
+        train_data, valid_data = train_test_split(
+            data=transformed_data,
+            test_split=model_config["validation_split"]
+        )
+
         # # use default hyperparameters to train model
         logger.info("Training forecaster...")
         forecaster = train_predictor_model(
-            history=transformed_data,
+            train_data=train_data,
+            valid_data=valid_data,
             forecast_length=data_schema.forecast_length,
             frequency=data_schema.frequency,
             hyperparameters=default_hyperparameters

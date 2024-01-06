@@ -1,11 +1,10 @@
 import numpy as np
-import sys
 from data_models.schema_validator import Frequency
 from preprocessing.custom_transformers import TimeSeriesMinMaxScaler
 
 np.random.seed(1)
 
-MAX_NUM_PRETRAINING_SERIES = 50_000
+MAX_NUM_PRETRAINING_SERIES = 75_000
 
 def calculate_max_N(T: int, D: int, target_ram_gb: float) -> int:
     """
