@@ -1,6 +1,8 @@
 import json
 import os
 import random
+import time
+import tracemalloc
 from typing import Any, Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -102,6 +104,7 @@ def cast_time_col(data: pd.DataFrame, time_col: str, dtype: str) -> pd.DataFrame
         raise ValueError(f"Invalid data type for time column: {dtype}")
     return data
 
+
 def set_seeds(seed_value: int) -> None:
     """
     Set the random seeds for Python, NumPy, etc. to ensure
@@ -163,7 +166,9 @@ def split_train_val_by_series(
     return train_data, val_data
 
 
-def train_test_split(data: np.ndarray, test_split: float = 0.2) -> Tuple[np.ndarray, np.ndarray]:
+def train_test_split(
+    data: np.ndarray, test_split: float = 0.2
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Splits a numpy array into train and test sets along the first dimension.
 
@@ -275,3 +280,45 @@ def make_serializable(obj: Any) -> Union[int, float, List[Union[int, float]], An
         return obj.tolist()
     else:
         return json.JSONEncoder.default(None, obj)
+
+
+def get_peak_memory_usage() -> Union[float, None]:
+    """
+    Returns the peak memory usage by current cuda device if available
+    """
+    if not T.cuda.is_available():
+        return None
+
+    current_device = T.cuda.current_device()
+    peak_memory = T.cuda.max_memory_allocated(current_device)
+    return peak_memory / 1e6
+
+
+class TimeAndMemoryTracker(object):
+    """
+    This class serves as a context manager to track time and
+    memory allocated by code executed inside it.
+    """
+
+    def __init__(self, logger):
+        self.logger = logger
+
+    def __enter__(self):
+        tracemalloc.start()
+        self.start_time = time.time()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.end_time = time.time()
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        cuda_peak = get_peak_memory_usage()
+
+        elapsed_time = self.end_time - self.start_time
+
+        self.logger.info(f"Execution time: {elapsed_time:.2f} seconds")
+        self.logger.info(f"Memory allocated (peak): {peak / 1024**2:.2f} MB")
+
+        if cuda_peak:
+            self.logger.info(f"CUDA Memory allocated (peak): {cuda_peak:.2f} MB")
